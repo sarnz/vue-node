@@ -1,0 +1,77 @@
+<script setup lang="ts">
+import * as vNG from "v-network-graph";
+import {
+  ForceLayout,
+  ForceNodeDatum,
+  ForceEdgeDatum,
+} from "v-network-graph/lib/force-layout";
+// import data from './data';
+import generateGraphData from './data';
+const nodeSize = 60;
+
+
+
+const fetchDataAndUseGraphData = async () => {
+  try {
+    const { nodes, edges } = await generateGraphData();
+    // console.log(nodes);
+    // console.log(edges);
+    return { nodes, edges };
+  } catch (error) {
+    console.error('Error fetching and using graph data:', error);
+    return { nodes: {}, edges: {} };
+  }
+}
+
+const data = await fetchDataAndUseGraphData(); // ต้องรอให้เสร็จสิ้นก่อนจึงจะได้ข้อมูลที่เก็บไว้ใน data
+
+const nodeData = data.nodes; // สามารถเข้าถึงข้อมูล nodes ที่เราได้รับจากการเรียกใช้ fetchDataAndUseGraphData() ได้ด้วยตัวแปร data
+const edgeData  = data.edges; // สามารถเข้าถึงข้อมูล nodes ที่เราได้รับจากการเรียกใช้ fetchDataAndUseGraphData() ได้ด้วยตัวแปร data
+
+
+console.log(nodeData)
+
+const configs = vNG.defineConfigs({
+  view: {
+    autoPanAndZoomOnLoad: "fit-content",
+    layoutHandler: new ForceLayout({
+      positionFixedByDrag: false,
+      positionFixedByClickWithAltKey: false,
+      noAutoRestartSimulation: true,
+      createSimulation: (d3, nodes, edges) => {
+        const forceLink = d3
+          .forceLink<ForceNodeDatum, ForceEdgeDatum>(edges)
+          .id((d: ForceNodeDatum) => d.id);
+        return d3
+          .forceSimulation(nodes)
+          .force("edge", forceLink.distance(10).strength(1))
+          .force("charge", d3.forceManyBody().strength(-2000))
+          .force("x", d3.forceX())
+          .force("y", d3.forceY())
+          .stop()
+          .tick(100);
+      },
+    }),
+  },
+  node: {
+    normal: { radius: nodeSize / 2, color: node => node.color },
+    label: { direction: "center", color: "#fff" },
+  },
+  edge: {
+    normal: { color: 'black' },
+    marker: {
+      source: { type: "none", width: 4, height: 4, margin: -1, offset: 0, units: "strokeWidth", color: null },
+      target: { type: "arrow", width: 4, height: 4, margin: -1, offset: 0, units: "strokeWidth", color: "black" },
+    },
+  },
+});
+</script>
+
+<template>
+  <v-network-graph
+    :nodes="nodeData"
+    :edges="edgeData"
+    :configs="configs"
+    :directed="true"
+  />
+</template>

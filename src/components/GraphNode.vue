@@ -1,54 +1,130 @@
 
 <script lang="ts">
-import { defineComponent,onMounted } from 'vue';
+import { defineComponent,onMounted, PropType  } from 'vue';
 import * as vNG from 'v-network-graph';
 import { ForceLayout, ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-layout';
 import generateGraphData from './data';
-import { reactive, ref, watch } from "vue"
+import { reactive, ref, watch } from "vue";
 import { useStore } from 'vuex';
 
+
+
 export default defineComponent({
-  setup() {
+   props: {
+    dataType: Array,
+    nodeSelectId: String
+   
+
+  },
+  setup(props) {
+
+  let nodeSelectId = ref(props.nodeSelectId);
+
+
+  const categories = ref(props.dataType);
+  // const graphData = ref<any>(null);
+
   const selectedNodes = ref<string[]>([])
     // ประกาศฟังก์ชัน setup() เป็น async
+
+   
+
     const setup = async () => {
-      // เรียกใช้ generateGraphData() โดยใช้ await
-      const graphData = await generateGraphData();
-      console.log(graphData.nodes);
-       console.log(graphData.edges);
+
+    const store = useStore();
+      
+
+let data = [
+    {
+        "id": 1,
+        "type_name": "Farm",
+        "type_name_th": "ฟาร์มปศุสัตว์",
+        "items": [
+            {
+                "id": 1,
+                "company_id": 1,
+                "type_id": 1,
+                "company": {
+                    "id": 1,
+                    "company_name": "บริษัท ส. ขอนแก่นฟู้ดส์ จำกัด (มหาชน)",
+                    "short_name": "SORKON",
+                    "company_number": "0107537001811",
+                    "company_amount": "323400000"
+                }
+            },
+            {
+                "id": 18,
+                "company_id": 12,
+                "type_id": 1,
+                "company": {
+                    "id": 12,
+                    "company_name": "บริษัท ไทยฟู้ดส์ กรุ๊ป จำกัด (มหาชน)",
+                    "short_name": "TGF",
+                    "company_number": "0107557000292",
+                    "company_amount": "6168330045 "
+                }
+            }
+        ]
+    }
+]
+
+       const graphData = await generateGraphData(store.state.dataType);
+ 
+        store.commit('setNodeList', graphData.nodes);
+
+
+//       const fetchDataAndUpdateGraph = async () => {
+//        const graphData = await generateGraphData(store.state.dataType);
+//         store.commit('setNodeList', graphData.nodes);
+//     }
+//  onMounted(fetchDataAndUpdateGraph);
+//     watch(() => store.state.selectedCategories, fetchDataAndUpdateGraph);
+
+
 
       const nodeSize = 60;
       const configs = vNG.defineConfigs({
-        view: {
-          autoPanAndZoomOnLoad: 'fit-content',
-          minZoomLevel: 0.1,
-          maxZoomLevel: 16,
-          layoutHandler: new ForceLayout({
-            positionFixedByDrag: false,
-            positionFixedByClickWithAltKey: false,
-            noAutoRestartSimulation: true,
-            createSimulation: (d3, nodes, edges) => {
-              const forceLink = d3
-                .forceLink<ForceNodeDatum, ForceEdgeDatum>(edges)
-                .id((d: ForceNodeDatum) => d.id);
-              return d3
-                .forceSimulation(nodes)
-                 .force("edge", forceLink.distance(300).strength(0.5))
-                .force('charge', d3.forceManyBody().strength(-2000))
-                .force('x', d3.forceX())
-                .force('y', d3.forceY())
-                .stop()
-                .tick(100);
-            },
-          }),
-        },
+         view: {
+             minZoomLevel: 0.51,
+    maxZoomLevel: 16,
+    autoPanAndZoomOnLoad: "fit-content",
+    scalingObjects: true,
+    layoutHandler: new ForceLayout({
+      positionFixedByDrag: false,
+      positionFixedByClickWithAltKey: false,
+
+      noAutoRestartSimulation: true, // If the line is deleted or set to false,
+      // d3-force recalculation will be performed when nodes are dragged or
+      // the network changes.
+
+      createSimulation: (d3, nodes, edges) => {
+        const forceLink = d3
+          .forceLink<ForceNodeDatum, ForceEdgeDatum>(edges)
+          .id((d: ForceNodeDatum) => d.id);
+        // Specify your own d3-force parameters
+        return d3
+          .forceSimulation(nodes)
+          .force("edge", forceLink.distance(60).strength(1))
+          .force("charge", d3.forceManyBody().strength(-2000))
+          .force("x", d3.forceX())
+          .force("y", d3.forceY())
+          .stop() // tick manually
+          .tick(100);
+      },
+    }),
+  },
+
+    
         node: {
           normal: { radius: nodeSize / 2, color: (node: any) => node.color },
-          label: { direction: 'center', color: '#fff', size: '10' },
-             selectable: true,
+          label: { direction: 'center', color: '#fff', fontSize: 10, class: 'node-label' },
+       
+    
         },
         edge: {
           normal: { color: 'black' },
+          label: { color: 'black', fontSize: 5 },
+          
           marker: {
             source: {
               type: 'none',
@@ -71,8 +147,38 @@ export default defineComponent({
           },
         },
       });
-      console.log(selectedNodes)
-      return { graphData, configs,selectedNodes };
+
+const eventHandlers: vNG.EventHandlers = {
+  "node:select": (event) => {
+        store.commit('setNodeSelected', event[0]);
+        // console.log('setNodeSelected')  
+  }
+};
+
+
+      configs.node.selectable = true
+      const limit = ref(-1)
+      watch(limit, v => {
+        selectedNodes.value = [] // reset
+        switch (v) {
+          case 0: // disabled
+            configs.node.selectable = false
+            break
+          case 1: // limit
+          case 2:
+            configs.node.selectable = v
+            break
+          case -1: // unlimited
+          default:
+            configs.node.selectable = true
+            break
+        }
+      })
+      // console.log(selectedNodes.value)
+      const graph = ref<vNG.Instance>()
+       const zoomLevel = ref(1)
+       
+      return { graphData, configs, selectedNodes, eventHandlers, nodeSelectId, graph, zoomLevel };
       
     };
     
@@ -83,17 +189,43 @@ export default defineComponent({
 
 
 
+
+
 </script>
 
 
 <template>
+    <div class="demo-control-panel">
+      <button class="btn btn-secondary mx-3" @click="graph?.zoomIn()">Zoom In</button>
+      <button class="btn btn-secondary" @click="graph?.zoomOut()">Zoom Out</button>
+      <el-slider-custom-zoom v-model="zoomLevel" />
+  </div>
 
-  <v-network-graph
+  <v-network-graph style="height:500px"
+
     v-if="graphData"
+    ref="graph"
+v-model:zoom-level="zoomLevel"
+      :zoom-level="10"
     :nodes="graphData.nodes"
     :edges="graphData.edges"
     :configs="configs"
     :directed="true"
      v-model:selected-nodes="selectedNodes"
-  />
+     :event-handlers="eventHandlers"
+  
+  >
+     <template #edge-label="{ edge, ...slotProps }">
+      <v-edge-label :text="edge.label" align="center" vertical-align="above" v-bind="slotProps" />
+    </template>
+  </v-network-graph>
+
+
 </template>
+<style scoped>
+.node-label {
+  white-space: normal;
+  word-wrap: break-word; /* หรือ word-break: break-all; */
+}
+
+</style>

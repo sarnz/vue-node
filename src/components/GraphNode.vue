@@ -44,11 +44,13 @@ export default defineComponent({
 
 
 watchEffect(() => {
+  if(store.state.selectedCategories.length == 0){
+    window.location.reload()
+  }
    generateGraphData(store.state.selectedCategories).then((data) => {
    graphData.value = data
-   
-       
-console.log('click',graphData)
+    store.commit('setNodeList', graphData.value.nodes);       
+    console.log('click',graphData)
   }).catch((error) => {
     console.error('Error generating graph data:', error);
   });

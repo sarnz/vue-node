@@ -1,7 +1,6 @@
 import { Nodes, Edges } from "v-network-graph";
 import axios from "axios";
-import { useStore } from 'vuex';
-const store = useStore();
+
 
 // สร้าง interface สำหรับข้อมูลประเภทอาหาร
 interface FoodType {
@@ -21,17 +20,34 @@ async function fetchFoodTypes(): Promise<FoodType[]> {
     return [];
   }
 }
+async function fetchFoodTypesByIds(ids: Array<string>): Promise<FoodType[]> {
+  try {
+    const response = await axios.post<FoodType[]>('http://company-api.test/api/types', {
+      ids: ids  // ส่งค่า selectedCategories ไปยังเซิร์ฟเวอร์เพื่อค้นหาข้อมูล
+    });
+    // console.log(response)
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching food types:', error);
+    return [];
+  }
+}
+
+
 
 // สร้าง async function เพื่อรอการดึงข้อมูลจาก API และสร้างข้อมูล nodes และ edges
-async function generateGraphData(dataType: Array<string>) {
-  // ดึงข้อมูลประเภทอาหาร
-  let foodTypes; // ประกาศตัวแปร foodTypes และกำหนดค่าเป็น undefined เพื่อให้มีขอบเขตใช้งานที่กว้างขึ้น
-  if (dataType.length == 0) {
-    foodTypes = await fetchFoodTypes(); // ถ้า dataType มีความยาวเท่ากับ 0 ให้ดึงข้อมูลจาก fetchFoodTypes()
-    console.log('foodType',foodTypes)
+async function generateGraphData(ids: Array<string>) {
+
+
+  let foodTypes: FoodType[]; // ประกาศตัวแปร foodTypes และกำหนดค่าเป็น undefined เพื่อให้มีขอบเขตใช้งานที่กว้างขึ้น
+
+
+  if (ids && ids.length > 0) {
+    foodTypes = await fetchFoodTypesByIds(ids); // ถ้า ids มีค่าและมีความยาวมากกว่า 0 ให้ดึงข้อมูลจาก fetchFoodTypesByIds()
+    console.log('foodType', foodTypes);
   } else {
-    foodTypes = dataType; // ถ้า dataType มีความยาวไม่เท่ากับ 0 ให้ใช้ dataType เลย
-    console.log('foodType',foodTypes)
+    foodTypes = await fetchFoodTypes(); // ถ้า ids ไม่มีค่าหรือมีความยาวเป็น 0 ให้ดึงข้อมูลจาก fetchFoodTypes()
+    console.log('foodType', foodTypes);
   }
   // สร้าง nodes จากข้อมูลประเภทอาหาร
   const nodes: Nodes = {};

@@ -6,7 +6,7 @@ import { ForceLayout, ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib
 import generateGraphData from './data';
 import { reactive, ref, watch } from "vue";
 import { useStore } from 'vuex';
-
+import { watchEffect } from 'vue';
 
 
 export default defineComponent({
@@ -19,6 +19,7 @@ export default defineComponent({
   setup(props) {
 
   let nodeSelectId = ref(props.nodeSelectId);
+
 
 
   const categories = ref(props.dataType);
@@ -34,52 +35,24 @@ export default defineComponent({
     const store = useStore();
       
 
-let data = [
-    {
-        "id": 1,
-        "type_name": "Farm",
-        "type_name_th": "ฟาร์มปศุสัตว์",
-        "items": [
-            {
-                "id": 1,
-                "company_id": 1,
-                "type_id": 1,
-                "company": {
-                    "id": 1,
-                    "company_name": "บริษัท ส. ขอนแก่นฟู้ดส์ จำกัด (มหาชน)",
-                    "short_name": "SORKON",
-                    "company_number": "0107537001811",
-                    "company_amount": "323400000"
-                }
-            },
-            {
-                "id": 18,
-                "company_id": 12,
-                "type_id": 1,
-                "company": {
-                    "id": 12,
-                    "company_name": "บริษัท ไทยฟู้ดส์ กรุ๊ป จำกัด (มหาชน)",
-                    "short_name": "TGF",
-                    "company_number": "0107557000292",
-                    "company_amount": "6168330045 "
-                }
-            }
-        ]
-    }
-]
+       let loadData = await generateGraphData([]);
 
-       const graphData = await generateGraphData(store.state.dataType);
- 
-        store.commit('setNodeList', graphData.nodes);
+         let graphData = ref(loadData);
+        console.log('graphData',graphData)
+        store.commit('setNodeList', graphData.value.nodes);
 
 
-//       const fetchDataAndUpdateGraph = async () => {
-//        const graphData = await generateGraphData(store.state.dataType);
-//         store.commit('setNodeList', graphData.nodes);
-//     }
-//  onMounted(fetchDataAndUpdateGraph);
-//     watch(() => store.state.selectedCategories, fetchDataAndUpdateGraph);
 
+watchEffect(() => {
+   generateGraphData(store.state.selectedCategories).then((data) => {
+   graphData.value = data
+   
+       
+console.log('click',graphData)
+  }).catch((error) => {
+    console.error('Error generating graph data:', error);
+  });
+});
 
 
       const nodeSize = 60;
@@ -154,7 +127,6 @@ const eventHandlers: vNG.EventHandlers = {
         // console.log('setNodeSelected')  
   }
 };
-
 
       configs.node.selectable = true
       const limit = ref(-1)

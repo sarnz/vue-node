@@ -6,13 +6,12 @@
       <div class="col-12 mb-3">
         <div class="card shadow-lg radius-lg ">
             <div class="card-body d-flex align-items-center justify-content-between gap-3">
-    <h5 class="card-title col-2">เลือกประเภทที่ต้องการดู</h5>
+    <h5 class="card-title col-2 ">เลือกประเภทที่ต้องการดู</h5>
     <div class="d-flex flex-wrap gap-3"> <!-- เพิ่ม flex-wrap เพื่อให้ข้อมูล wrap ได้เมื่อมีข้อมูลเกิน -->
         <div class="form-check" v-for="category in categories" :key="category.id">
             <input class="form-check-input" @change="fetchData" type="checkbox" :id="'category_' + category.id" v-model="selectedCategories" :value="category.id">
             <label class="form-check-label" :for="'category_' + category.id">{{ category.type_name }} ({{ category.type_name_th }})</label>
         </div>
-        <button class="btn btn-primary btn-sm w-100">ค้นหา</button>
     </div>
 </div>
 
@@ -102,6 +101,7 @@ import generateGraphData from './data';
 import axios from "axios";
 import { computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 
 export default defineComponent({
@@ -172,7 +172,7 @@ export default defineComponent({
         this.dataType = response.data
          this.$store.commit('setCategorySelect', response.data);
 
-    
+        // window.location.href = '?category='+[this.selectedCategories];
 
         this.$store.commit('setCategorySelectByClick', this.selectedCategories);
         console.log('setCategorySelectByClick',this.$store.state.selectedCategories); // แสดงข้อมูลที่ได้รับกลับจากเซิร์ฟเวอร์
@@ -193,5 +193,12 @@ export default defineComponent({
   width: 100%;
   height: 500px;
   /* border: 1px solid #000; */
+}
+.nav-link.active {
+  color: #0d6efd;
+}
+
+.nav-link {
+  color: black;
 }
 </style>

@@ -44,8 +44,15 @@ export default defineComponent({
 
 
 watchEffect(() => {
+  
   if(store.state.selectedCategories.length == 0){
-    window.location.reload()
+    // window.location.reload()
+
+  // Animates the movement of an element.
+  graph.value?.transitionWhile(() => {
+   // layout(direction)
+  })
+
   }
    generateGraphData(store.state.selectedCategories).then((data) => {
    graphData.value = data
@@ -58,7 +65,7 @@ watchEffect(() => {
 
 
       const nodeSize = 60;
-      const configs = vNG.defineConfigs({
+      const initialConfigs =  vNG.defineConfigs({
          view: {
              minZoomLevel: 0.51,
     maxZoomLevel: 16,
@@ -68,7 +75,7 @@ watchEffect(() => {
       positionFixedByDrag: false,
       positionFixedByClickWithAltKey: false,
 
-      noAutoRestartSimulation: true, // If the line is deleted or set to false,
+    //  noAutoRestartSimulation: true, // If the line is deleted or set to false,
       // d3-force recalculation will be performed when nodes are dragged or
       // the network changes.
 
@@ -87,13 +94,11 @@ watchEffect(() => {
           .tick(100);
       },
     }),
-  },
-
-    
+          },
         node: {
           normal: { radius: nodeSize / 2, color: (node: any) => node.color },
           label: { direction: 'center', color: '#fff', fontSize: 10, class: 'node-label' },
-       
+
     
         },
         edge: {
@@ -122,7 +127,7 @@ watchEffect(() => {
           },
         },
       });
-
+const configs = reactive(initialConfigs)
 const eventHandlers: vNG.EventHandlers = {
   "node:select": (event) => {
         store.commit('setNodeSelected', event[0]);
@@ -150,6 +155,7 @@ const eventHandlers: vNG.EventHandlers = {
       })
       // console.log(selectedNodes.value)
       const graph = ref<vNG.Instance>()
+      
        const zoomLevel = ref(1)
        
       return { graphData, configs, selectedNodes, eventHandlers, nodeSelectId, graph, zoomLevel };
@@ -187,7 +193,7 @@ v-model:zoom-level="zoomLevel"
     :directed="true"
      v-model:selected-nodes="selectedNodes"
      :event-handlers="eventHandlers"
-  
+      :layouts="graphData.layouts"
   >
      <template #edge-label="{ edge, ...slotProps }">
       <v-edge-label :text="edge.label" align="center" vertical-align="above" v-bind="slotProps" />

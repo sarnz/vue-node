@@ -65,7 +65,7 @@ const store: StoreOptions<State> = {
                 return JSON.parse(JSON.stringify(value));
             });
             state.type = jsonFilteredNodesData;
-            // console.log(jsonFilteredNodesData)
+             console.log('jsonFilteredNodesData',jsonFilteredNodesData)
             state.tabEdge = true
             console.log(state.type)
           }else{

@@ -1,6 +1,6 @@
-import { Nodes, Edges } from "v-network-graph";
+import { Nodes, Edges, Layouts  } from "v-network-graph";
 import axios from "axios";
-
+import { reactive } from "vue"
 
 // สร้าง interface สำหรับข้อมูลประเภทอาหาร
 interface FoodType {
@@ -94,7 +94,9 @@ for (let i = 0; i < typeName.length; i++) {
   });
  
 
-
+  const layouts: Layouts = reactive({
+    nodes: {},
+  })
   // สร้าง edges โดยให้เชื่อมต่อ foodType.items.type_id กับ foodTypes.id
   const edges: Edges = {};
   foodTypes.forEach((foodType: any, index: number) => {
@@ -108,7 +110,7 @@ for (let i = 0; i < typeName.length; i++) {
     }
   });
   
-  return { nodes, edges };
+  return { nodes, edges, layouts };
 }
 
 // สร้างโมดูลที่สามารถนำไปใช้งานได้

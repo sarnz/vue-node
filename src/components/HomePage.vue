@@ -62,7 +62,7 @@
                   
        <nav>
   <div class="nav text-sm nav-tabs" id="nav-tab" role="tablist">
-    <button v-for="(item, index) in this.$store.state.type[0].company" :key="index" class="nav-link" :class="{ 'active': index === 0 }" id="nav-{{item.id}}-tab" data-bs-toggle="tab" :data-bs-target="'#nav-' + item.id" type="button" role="tab" :aria-controls="'nav-' + item.id" :aria-selected="index === 0">
+    <button v-for="(item, index) in this.$store.state.type[0].company" :key="index" class="nav-link" :class="{ 'text-primary active': index === 0}" id="nav-{{item.id}}-tab" data-bs-toggle="tab" :data-bs-target="'#nav-' + item.id" type="button" role="tab" :aria-controls="'nav-' + item.id" :aria-selected="index === 0">
       <i class="fa-regular fa-square"></i> {{ item.company.short_name }}
     </button>
 

@@ -62,7 +62,7 @@
                   
        <nav>
   <div class="nav text-sm nav-tabs" id="nav-tab" role="tablist">
-    <button v-for="(item, index) in this.$store.state.type[0].company" :key="index" class="nav-link" :class="{ 'text-primary active': index === 0}" id="nav-{{item.id}}-tab" data-bs-toggle="tab" :data-bs-target="'#nav-' + item.id" type="button" role="tab" :aria-controls="'nav-' + item.id" :aria-selected="index === 0">
+    <button v-for="(item, index) in this.$store.state.type[0].company" :key="index" class="nav-link"  id="nav-{{item.id}}-tab" data-bs-toggle="tab" :data-bs-target="'#nav-' + item.id" type="button" role="tab" :aria-controls="'nav-' + item.id" :aria-selected="index === 0">
       <i class="fa-regular fa-square"></i> {{ item.company.short_name }}
     </button>
 
@@ -70,7 +70,7 @@
 </nav>
 
 <div class="tab-content" id="nav-tabContent">
-  <div v-for="(item, index) in this.$store.state.type[0].company" :key="index" :id="'nav-' + item.id" class="tab-pane fade" :class="{ 'show active': index === 0 }" role="tabpanel" :aria-labelledby="'nav-' + item.id + '-tab'">
+  <div v-for="(item, index) in this.$store.state.type[0].company" :key="index" :id="'nav-' + item.id" class="tab-pane fade"  role="tabpanel" :aria-labelledby="'nav-' + item.id + '-tab'">
     <h4 class="mt-3">รายได้แต่ละปี</h4>
     <div class="overflow-auto" style="max-height: 300px;">
      <div v-for="(revenue, revenueIndex) in item.company.revenue" :key="revenueIndex">
@@ -195,7 +195,7 @@ export default defineComponent({
   /* border: 1px solid #000; */
 }
 .nav-link.active {
-  color: #0d6efd;
+  color: #0d6efd !important;
 }
 
 .nav-link {

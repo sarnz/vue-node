@@ -75,7 +75,7 @@ watchEffect(() => {
       positionFixedByDrag: false,
       positionFixedByClickWithAltKey: false,
 
-    //  noAutoRestartSimulation: true, // If the line is deleted or set to false,
+     noAutoRestartSimulation: false, // If the line is deleted or set to false,
       // d3-force recalculation will be performed when nodes are dragged or
       // the network changes.
 
@@ -86,7 +86,7 @@ watchEffect(() => {
         // Specify your own d3-force parameters
         return d3
           .forceSimulation(nodes)
-          .force("edge", forceLink.distance(60).strength(1))
+          .force("edge", forceLink.distance(100).strength(1))
           .force("charge", d3.forceManyBody().strength(-2000))
           .force("x", d3.forceX())
           .force("y", d3.forceY())
